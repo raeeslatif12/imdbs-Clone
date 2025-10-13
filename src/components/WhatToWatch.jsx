@@ -3,22 +3,14 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import { FaPlay, FaBookmark, FaInfoCircle } from "react-icons/fa";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import MovieCard from "./MovieCard ";
 
-export default function WhatToWatch() {
+export default function WhatToWatch({ watchlist, toggleFavorite, isFavorite }) {
   const [movies, setMovies] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const swiperRef = useRef(null);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
-
-  useEffect(() => {
-    const savedFavs = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(savedFavs);
-  }, []);
 
   useEffect(() => {
     async function fetchMovies() {
@@ -43,36 +35,16 @@ export default function WhatToWatch() {
         swiperRef.current.params.navigation.nextEl = nextRef.current;
         swiperRef.current.navigation.init();
         swiperRef.current.navigation.update();
-        if (swiperRef.current.autoplay) {
-          swiperRef.current.autoplay.stop();
-          swiperRef.current.autoplay.start();
-        }
       }
     }, 500);
     return () => clearTimeout(timer);
   }, [movies]);
-
-  const toggleFavorite = (movie) => {
-    let updatedFavorites;
-    if (favorites.some((fav) => fav.id === movie.id)) {
-      updatedFavorites = favorites.filter((fav) => fav.id !== movie.id);
-      toast.info("Removed from watchlist");
-    } else {
-      updatedFavorites = [...favorites, movie];
-      toast.success("Added to watchlist");
-    }
-    setFavorites(updatedFavorites);
-    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-  };
-
-  const isFavorite = (id) => favorites.some((fav) => fav.id === id);
 
   return (
     <div className="bg-black text-white px-6 py-10 relative">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-3xl font-bold">What to Watch</h2>
       </div>
-
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="h-6 w-1 bg-yellow-400 rounded"></span>
@@ -82,9 +54,7 @@ export default function WhatToWatch() {
           Sign in
         </a>
       </div>
-
       <p className="text-gray-400 mb-6">TV shows and movies just for you</p>
-
       <div className="relative">
         <Swiper
           modules={[Navigation, Autoplay]}
@@ -101,67 +71,20 @@ export default function WhatToWatch() {
         >
           {movies.map((movie) => (
             <SwiperSlide key={movie.id} className="!w-[180px]">
-              <div className="flex flex-col">
-                <div className="relative group">
-                  <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                    alt={movie.title}
-                    className="w-full h-[270px] object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-                  />
-
-                  <button
-                    onClick={() => toggleFavorite(movie)}
-                    className="absolute top-2 left-2 text-2xl cursor-pointer transition-transform hover:scale-110"
-                    title="Add to Watchlist"
-                  >
-                    <FaBookmark
-                      className={`${
-                        isFavorite(movie.id)
-                          ? "text-yellow-400"
-                          : "text-white/80 hover:text-white"
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                <div className="mt-2">
-                  <div className="flex items-center text-sm text-gray-300">
-                    <span className="text-yellow-400 mr-1">★</span>
-                    {movie.vote_average.toFixed(1)}
-                  </div>
-                  <h4 className="font-medium text-white truncate mt-1">
-                    {movie.title}
-                  </h4>
-
-                  <button
-                    onClick={() => toggleFavorite(movie)}
-                    className="bg-[#2c2c2c] cursor-pointer w-full text-white font-semibold rounded-md py-2 text-sm mt-3 hover:bg-[#3f3f3f] transition"
-                  >
-                    + Watchlist
-                  </button>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <button className="flex items-center gap-2 text-sm text-white bg-[#222] px-3 py-1.5 rounded-md hover:bg-[#333] transition-all group">
-                      <FaPlay className="text-yellow-400 group-hover:translate-x-1 transition" />
-                      <span className="font-semibold cursor-pointer">
-                        Watch Trailer
-                      </span>
-                    </button>
-                    <FaInfoCircle className="text-lg text-white hover:text-gray-300 cursor-pointer" />
-                  </div>
-                </div>
-              </div>
+              <MovieCard
+                movie={movie}
+                isFavorite={isFavorite}
+                toggleFavorite={toggleFavorite}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
-
         <div
           ref={prevRef}
           className="absolute top-1/2 left-2 -translate-y-1/2 z-10 cursor-pointer hidden md:flex bg-black/50 p-3 rounded hover:bg-black/70 transition"
         >
           <FaChevronLeft className="w-6 h-6" />
         </div>
-
         <div
           ref={nextRef}
           className="absolute top-1/2 right-2 -translate-y-1/2 z-10 cursor-pointer hidden md:flex bg-black/50 p-3 rounded hover:bg-black/70 transition"
@@ -169,8 +92,6 @@ export default function WhatToWatch() {
           <FaChevronRight className="w-6 h-6" />
         </div>
       </div>
-
-      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }

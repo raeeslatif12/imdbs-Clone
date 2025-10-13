@@ -34,7 +34,8 @@ export default function MostCelebrities() {
           {
             method: "GET",
             headers: {
-              "X-Rapidapi-Key": RAPIDAPI_KEY,
+              "X-Rapidapi-Key":
+                "fcef8fb5e4msh69c81b925baac84p115885jsn4b86e8d9c29f",
               "X-Rapidapi-Host": "celebrities-api-by-apirobots.p.rapidapi.com",
             },
           }
